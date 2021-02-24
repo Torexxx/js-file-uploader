@@ -44,3 +44,57 @@ body {
 input[type=file] {
     display: none;
 }
+.preview {
+    display: flex;
+    flex-wrap: wrap;
+    padding: .5rem;
+}
+.preview-image {
+    position: relative;
+    margin-right: .5rem;
+    margin-bottom: .5rem;
+    overflow: hidden;
+}
+.preview-image.removing {
+    transform: scale(0);
+    transition: .3s;
+}
+.preview-image img {
+    height: auto;
+    width: 180px;
+    display: block;
+}
+.preview-image:hover .preview-remove {
+    opacity: 1;
+}
+.preview-image:hover .preview-info {
+    bottom: 0;
+}
+.preview-remove {
+    opacity: 0;
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    right: 0;
+    top: 0;
+    background: rgba(255, 255, 255, .5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    transition: opacity .25s;
+}
+.preview-info {
+    position: absolute;
+    right: 0;
+    bottom: -30px;
+    left: 0;
+    height: 25px;
+    font-size: .8rem;
+    background: rgba(255, 255, 255, .5);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 5px;
+    transition: bottom .25s;
+}
