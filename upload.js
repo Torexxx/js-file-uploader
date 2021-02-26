@@ -7,16 +7,30 @@ function bytesToSize(bytes) {
     return Math.round(bytes / Math.pow(1024, i)) + ' ' + sizes[i];
 }
 
-export const upload = (selector, options) => {
+function noop() {}
+
+const element = (tag, classes = [], content) => {
+    let node = document.createElement(tag);
+
+    if (classes.length) {
+        node.classList.add(...classes);
+    }
+
+    if (content) {
+        node.textContent = content;
+    }
+
+    return node;
+};
+
+export function upload(selector, options) {
     let files = [];
+    const onUpload = options.onUpload ?? noop;
     const input = document.querySelector(selector);
-    const preview = document.createElement('div');
-
-    preview.classList.add('preview')
-
-    const open = document.createElement('button');
-    open.classList.add('btn');
-    open.textContent = 'Открыть';
+    const preview = element('div', ['preview']);
+    const open = element('button', ['btn'], 'Открыть');
+    const upload = element('button', ['btn', 'primary'], 'Загрузить');
+    upload.style.display = 'none';
 
     if (options.multi) {
         input.setAttribute('multiple', true);
@@ -27,6 +41,7 @@ export const upload = (selector, options) => {
     }
 
     input.insertAdjacentElement('afterend', preview);
+    input.insertAdjacentElement('afterend', upload);
     input.insertAdjacentElement('afterend', open);
 
     const triggerInput = () => input.click();
@@ -36,6 +51,8 @@ export const upload = (selector, options) => {
         if (!e.target.files.length) {
             return
         }
+
+        upload.style.display = 'inline';
 
         files = Array.from(e.target.files);
 
@@ -50,16 +67,14 @@ export const upload = (selector, options) => {
             reader.onload = (ev) => {
                 const src = ev.target.result
                 preview.insertAdjacentHTML('afterbegin', `
-                    <div class="preview">
                         <div class="preview-image">
                         <div class="preview-remove" data-name="${file.name}">&times;</div>
                             <img src="${src}" alt="${file.name}"/>
                             <div class="preview-info">
-                            <span>${file.name}</span> 
-                            ${bytesToSize(file.size)}
+                                <span>${file.name}</span> 
+                                ${bytesToSize(file.size)}
                             </div>
                         </div>
-                    </div>
                 `)
             }
 
@@ -75,6 +90,10 @@ export const upload = (selector, options) => {
         const {name} = e.target.dataset;
         files = files.filter(file => file.name !== name);
 
+        if (!files.length) {
+            upload.style.display = 'none';
+        }
+
         const block = preview
             .querySelector(`[data-name="${name}"]`)
             .closest('.preview-image');
@@ -83,7 +102,20 @@ export const upload = (selector, options) => {
         setTimeout(() => block.remove(), 300);
     }
 
+    const clearPreview = (el)  => {
+        el.style.bottom = '0';
+        el.innerHTML = '<div class="preview-info-progress"></div>'
+    }
+
+    const uploadHandler = () => {
+        preview.querySelectorAll('.preview-remove').forEach(el => el.remove());
+        const previewInfo =  preview.querySelectorAll('.preview-info');
+        previewInfo.forEach(clearPreview);
+        onUpload(files, previewInfo);
+    }
+
     open.addEventListener('click', triggerInput);
     input.addEventListener('change', changeHandler);
     preview.addEventListener('click', removeHandler);
+    upload.addEventListener('click', uploadHandler);
 }

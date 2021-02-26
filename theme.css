@@ -98,3 +98,16 @@ input[type=file] {
     padding: 0 5px;
     transition: bottom .25s;
 }
+
+.preview-info-progress {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    background: #42b983;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: width .25s;
+    width: 30%
+}
